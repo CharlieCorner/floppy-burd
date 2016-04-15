@@ -5,11 +5,24 @@ var mainState = {
 		game.load.image("bird", "assets/bird.png");
 		game.load.image("pipe", "assets/pipe.png");
 		game.load.audio("jump", "assets/swimming.wav");
-		game.load.audio("dead", "assets/firework.wav");
+		game.load.audio("crash", "assets/firework.wav");
 		game.load.audio("coin", "assets/coin.wav");
+		game.load.audio("dead", "assets/dead.wav");
 	},
 	
 	create : function(){
+		
+		if (game.device.desktop === false) {
+			
+			game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+			
+			game.scale.setMinMax(game.width/2, game.heigth/2, game.width, game.height);
+			
+			game.scale.pageAlignHorizontally = true;
+			game.scale.pageAlignVertically = true;
+			
+		}
+		
 		
 		game.stage.backgroundColor = "#71c5cf";
 		
@@ -41,13 +54,17 @@ var mainState = {
 		});
 		
 		this.jumpSound = game.add.audio("jump");
-		this.deadSound = game.add.audio("dead");
+		this.crashSound = game.add.audio("crash");
 		this.coinSound = game.add.audio("coin");
+		this.deadSound = game.add.audio("dead");
 	},
 	
 	update : function(){
 		
 		if (this.bird.y < 0 || this.bird.y > 490) {
+			if (this.score > 0 && this.bird.alive){
+				this.deadSound.play();
+			}
 			this.restartGame();
 		}
 		
@@ -64,7 +81,7 @@ var mainState = {
 			return;
 		}
 		
-		this.deadSound.play();
+		this.crashSound.play();
 		
 		this.bird.alive = false;
 		
