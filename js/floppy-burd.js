@@ -33,7 +33,7 @@ var mainState = {
 		
 		this.timer = game.time.events.loop(1500, this.addRowOfPipes, this);
 		
-		this.score = 0;
+		this.score = -1;
 		
 		this.labelScore = game.add.text(20, 20, "0", {
 			font: "30px Arial",
@@ -113,7 +113,10 @@ var mainState = {
 	addRowOfPipes: function(){
 		this.score += 1;
 		this.labelScore.text = this.score;
-		this.coinSound.play();
+		
+		if (this.score > 0) {
+			this.coinSound.play();
+		}
 		
 		var hole = Math.floor(Math.random() * 5) + 1;
 		
