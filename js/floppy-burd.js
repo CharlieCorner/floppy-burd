@@ -4,6 +4,9 @@ var mainState = {
 		
 		game.load.image("bird", "assets/bird.png");
 		game.load.image("pipe", "assets/pipe.png");
+		game.load.audio("jump", "assets/swimming.wav");
+		game.load.audio("dead", "assets/firework.wav");
+		game.load.audio("coin", "assets/coin.wav");
 	},
 	
 	create : function(){
@@ -18,9 +21,13 @@ var mainState = {
 		
 		this.bird.body.gravity.y = 1000;
 		
+		this.bird.anchor.setTo(-0.2, 0.5);
+		
 		var spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		
 		spaceKey.onDown.add(this.jump, this);
+		
+		game.input.onDown.add(this.jump, this);
 		
 		this.pipes = game.add.group();
 		
@@ -32,6 +39,10 @@ var mainState = {
 			font: "30px Arial",
 			fill: "#ffffff"
 		});
+		
+		this.jumpSound = game.add.audio("jump");
+		this.deadSound = game.add.audio("dead");
+		this.coinSound = game.add.audio("coin");
 	},
 	
 	update : function(){
@@ -40,11 +51,46 @@ var mainState = {
 			this.restartGame();
 		}
 		
-		game.physics.arcade.overlap(this.bird, this.pipes, this.restartGame, null, this);
+		game.physics.arcade.overlap(this.bird, this.pipes, this.hitPipe, null, this);
+		
+		if (this.bird.angle < 20) {
+			this.bird.angle += 1;
+		}
+	},
+	
+	hitPipe : function(){
+		
+		if (this.bird.alive === false) {
+			return;
+		}
+		
+		this.deadSound.play();
+		
+		this.bird.alive = false;
+		
+		game.time.events.remove(this.timer);
+		
+		this.pipes.forEach(function(p){
+			p.body.velocity.x = 0;
+		}, this);
+		
 	},
 	
 	jump : function(){
+		
+		if (this.bird.alive === false) {
+			return;
+		}
+		
+		this.jumpSound.play();
+		
 		this.bird.body.velocity.y = -350;
+		
+		var animation = game.add.tween(this.bird);
+		
+		animation.to({angle: -20}, 100);
+		
+		animation.start();
 	},
 	
 	restartGame : function(){
@@ -67,6 +113,7 @@ var mainState = {
 	addRowOfPipes: function(){
 		this.score += 1;
 		this.labelScore.text = this.score;
+		this.coinSound.play();
 		
 		var hole = Math.floor(Math.random() * 5) + 1;
 		
